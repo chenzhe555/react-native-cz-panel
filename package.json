@@ -13,7 +13,10 @@
   ],
   "author": "陈哲是个好孩子",
   "license": "MIT",
-  "peerDependencies": {
-    "react-native": "^0.41.2"
+  "dependencies": {
+    "react-native-cz-scroll-tab": "0.0.3"
+  },
+  "devDependencies": {
+    "react-native-cz-scroll-tab": "0.0.3"
   }
 }
