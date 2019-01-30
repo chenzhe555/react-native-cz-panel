@@ -36,9 +36,9 @@ export default class CZPanel extends Component{
     * 初始化视图
     * */
     initializeViews() {
+        this.extraAreaView = new CZPackElement(<ExtraAreaView></ExtraAreaView>);
         this.switchButtonView = new CZPackElement(<SwitchButtonView></SwitchButtonView>);
         this.logView = new CZPackElement(<LogView></LogView>);
-        this.extraAreaView = new CZPackElement(<ExtraAreaView></ExtraAreaView>);
     }
 
     /*
