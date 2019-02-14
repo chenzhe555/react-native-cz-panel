@@ -39,11 +39,24 @@ export default class LogView extends Component{
         let originRef = this;
         console.log = (function (originFunc) {
             return function (info) {
-                if (originRef.consoles) {
-                    //目前只收集字符串类型数据
-                    if (typeof info == 'string' && info.length > 0) originRef.consoles.push(info);
-                } else {
-                    originRef.consoles = [];
+                if (!originRef.consolesDic) originRef.consolesDic = {};
+
+                //只记录字符串
+                if (typeof info == 'string') {
+                    if (info.indexOf('key***') != 0) {
+                        let consoleArr = originRef.consolesDic['console'] ? originRef.consolesDic['console'] : [];
+                        consoleArr.push(info);
+                        originRef.consolesDic['console'] = consoleArr;
+                    } else {
+                        let index = info.indexOf('***key');
+                        if (index != -1) {
+                            let key = info.substring(6, index);
+                            let keyArr = originRef.consolesDic[key] ? originRef.consolesDic[key] : [];
+                            keyArr.push(info.substring(12 + key.length, info.length - 12 - key.length));
+                            originRef.consolesDic[key] = keyArr;
+                        }
+                    }
+
                 }
                 originFunc.call(console, info);
             }
@@ -55,7 +68,8 @@ export default class LogView extends Component{
     * Cell文本长按事件
     * */
     _textOnLongPress(index) {
-        let item = this.consoles[index];
+        const { showKey } = this.state;
+        let item = this.consolesDic[showKey] ? (this.consolesDic[showKey][index] ? this.consolesDic[showKey][index] : '') : '';
         Clipboard.setString(item);
     }
     /************************** 子组件回调方法 **************************/
@@ -65,7 +79,8 @@ export default class LogView extends Component{
     * */
     show = () => {
         this.setState({
-            show: true
+            show: true,
+            showKey: ''
         });
     }
 
@@ -87,31 +102,76 @@ export default class LogView extends Component{
         )
     }
     /************************** Render中方法 **************************/
+    //清除日志
+    _clearConsole() {
+        this.consolesDic = {};
+        this.setState({
+            showKey: ''
+        });
+    }
+
+    //关闭当前日志视图
     _closeLogView() {
         this.hide();
         (global.CZPanelFuncDic['SwitchButtonView-shrinkSwitchButton'])();
     }
 
+    //获取Tab列表数组
+    _getTabDic() {
+        const { consolesDic } = this;
+
+        //顶部Tab
+        let tabList = Object.keys(consolesDic);
+        let tabArray = [];
+        tabList.forEach( (value) => {
+            tabArray.push({'name': value});
+        });
+        return tabArray;
+    }
+
+    //获取显示的Key值
+    _getShowKey(value) {
+        const { showKey } = this.state;
+        if (showKey.length > 0) return showKey;
+        else return value['name'] ? value['name'] : 'console';
+    }
+
+    //点击Tab事件
+    _selectItemAtIndex(item, index) {
+        this.setState({
+            showKey: item['name']
+        });
+    }
+
     render() {
-        const { show } = this.state;
+        const { show, showKey } = this.state;
         if (!show) return null;
 
-        const { consoles } = this;
+        const { consolesDic } = this;
+
+        //获取Tab列表数组
+        let tabArray = this._getTabDic();
+        //获取日志数组
+        let list = consolesDic[this._getShowKey(tabArray[0] ? tabArray[0] : {})];
+
 
         return (
             <View style={[styles.MainView]}>
                 <View style={[styles.LogTopView]}>
+                    <TouchableOpacity onPress={this._clearConsole.bind(this)}>
+                        <Text style={[{color: 'red', fontSize: 22}]}>Clear</Text>
+                    </TouchableOpacity>
                     <TouchableOpacity onPress={this._closeLogView.bind(this)}>
                         <View style={[styles.ExitButtonView]}>
                             <Image source={require('./images/exit_icon.png')} style={{width: 26, height: 26}}/>
                         </View>
                     </TouchableOpacity>
                 </View>
-                <CZScrollTab style={{height: 50}} list={[{'name': 'console'}, {'name': 'http'}]} normalTextStyles={{color: 'red', fontSize: 18}} selectedTextStyles={{color: 'red', fontSize: 22}}></CZScrollTab>
+                <CZScrollTab isScroll={true} style={{height: 50}} list={tabArray} normalTextStyles={{color: 'red', fontSize: 18}} selectedTextStyles={{color: 'red', fontSize: 22}} selectItemAtIndex={this._selectItemAtIndex.bind(this)}></CZScrollTab>
                 <View style={[{flex: 1}]}>
                     <FlatList
                         style={[{flex: 1}]}
-                        data={consoles}
+                        data={list}
                         renderItem={this._renderConsoleItem.bind(this)}
                     />
                 </View>
