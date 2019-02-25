@@ -14,11 +14,11 @@
   "author": "陈哲是个好孩子",
   "license": "MIT",
   "dependencies": {
-    "react-native-cz-scroll-tab": "0.0.3",
-    "react-native-cz-pack-element": "0.0.3"
+    "react-native-cz-scroll-tab": "^0.0.3",
+    "react-native-cz-pack-element": "^0.0.3"
   },
   "devDependencies": {
-    "react-native-cz-scroll-tab": "0.0.3",
-    "react-native-cz-pack-element": "0.0.3"
+    "react-native-cz-scroll-tab": "^0.0.3",
+    "react-native-cz-pack-element": "^0.0.3"
   }
 }
