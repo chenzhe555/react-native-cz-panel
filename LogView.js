@@ -43,20 +43,24 @@ export default class LogView extends Component{
 
                 //只记录字符串
                 if (typeof info == 'string') {
-                    if (info.indexOf('key***') != 0) {
-                        let consoleArr = originRef.consolesDic['console'] ? originRef.consolesDic['console'] : [];
-                        consoleArr.push(info);
-                        originRef.consolesDic['console'] = consoleArr;
-                    } else {
+                    //是否存储到其它Tab
+                    let otherKey = false;
+                    if (info.indexOf('key***') == 0) {
                         let index = info.indexOf('***key');
                         if (index != -1) {
                             let key = info.substring(6, index);
                             let keyArr = originRef.consolesDic[key] ? originRef.consolesDic[key] : [];
-                            keyArr.push(info.substring(12 + key.length, info.length - 12 - key.length));
+                            keyArr.push(info.substr(12 + key.length, info.length - 12 - key.length));
                             originRef.consolesDic[key] = keyArr;
+                            otherKey = true;
                         }
                     }
 
+                    if (!otherKey) {
+                        let consoleArr = originRef.consolesDic['console'] ? originRef.consolesDic['console'] : [];
+                        consoleArr.push(info);
+                        originRef.consolesDic['console'] = consoleArr;
+                    }
                 }
                 originFunc.call(console, info);
             }
